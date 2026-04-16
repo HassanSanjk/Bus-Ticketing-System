@@ -29,12 +29,18 @@ body{
     display: flex;
     align-items: center;
     justify-content: center;
+    background-color: white;
+    font-weight: bold;
+    user-select: none;
 }
 .seat.selected {
     background-color: #4caf50;
     color: white;
+    border-color: #4caf50;
 }
 .seat.reserved {
     background-color: #ccc;
+    color: #666;
     cursor: not-allowed;
+    border-color: #999;
 }

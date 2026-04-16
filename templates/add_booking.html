@@ -1,35 +1,98 @@
 {% extends 'base.html' %}
 
-{% block head %}<title>Add a Booking</title>{%endblock%}
+{% block head %}
+<title>Add a Booking</title>
+{% endblock %}
 
 {% block body %}
 <h2>Add a new booking</h2>
 
-<form method="POST">
-    <div class="dropdown">
-        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Choose Schedule
-        </button>
-        <ul class="dropdown-menu">
-            {% for schedule in schedules %}
-            <li><a class="dropdown-item" >{{ schedule.schedule_id }}: {{ schedule.start }} to {{ schedule.destination }} | {{schedule.departure_time }} | {{ schedule.arriving_time }} | {{ schedule.price }}</a></li>
-            {% endfor %}
-        </ul>
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('views.add_booking') }}">
+            <label for="schedule_id" class="form-label">Choose Schedule:</label>
+            <select name="schedule_id" id="schedule_id" class="form-control mb-3" required onchange="this.form.submit()">
+                <option value="">-- Select a schedule --</option>
+                {% for schedule in schedules %}
+                <option value="{{ schedule.schedule_id }}"
+                    {% if selected_schedule_id == schedule.schedule_id %}selected{% endif %}>
+                    {{ schedule.start }} to {{ schedule.destination }} |
+                    {{ schedule.departure_time }} |
+                    {{ schedule.arriving_time }} |
+                    Bus {{ schedule.bus_number }} |
+                    RM{{ schedule.price }}
+                </option>
+                {% endfor %}
+            </select>
+        </form>
     </div>
+</div>
+
+{% if selected_schedule %}
+<form method="POST">
+    <input type="hidden" name="schedule_id" value="{{ selected_schedule.schedule_id }}">
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5>Trip Details</h5>
+            <p class="mb-1"><strong>Route:</strong> {{ selected_schedule.start }} to {{ selected_schedule.destination }}</p>
+            <p class="mb-1"><strong>Departure:</strong> {{ selected_schedule.departure_time }}</p>
+            <p class="mb-1"><strong>Arrival:</strong> {{ selected_schedule.arriving_time }}</p>
+            <p class="mb-1"><strong>Bus:</strong> {{ selected_schedule.bus_number }}</p>
+            <p class="mb-0"><strong>Price:</strong> RM{{ selected_schedule.price }}</p>
+        </div>
+    </div>
+
+    <label class="form-label">Choose Seat:</label>
+    <div class="bus">
+        {% for seat in seat_labels %}
+            <div
+                class="seat {% if seat in reserved_seats %}reserved{% endif %}"
+                data-seat="{{ seat }}"
+            >
+                {{ seat }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <label for="seat_number" class="form-label mt-3">Selected Seat:</label>
+    <input class="form-control mb-3" type="text" name="seat_number" id="seat_number"
+           placeholder="Click a seat above" readonly required>
+
     <div class="card mb-2">
-        <div class="card-body ">
+        <div class="card-body">
             <h5>Payment</h5>
+
             <label for="card_number">Card Number:</label>
             <input class="form-control" type="text" name="card_number" placeholder="Card Number" required>
+
             <label for="expiration_date">Expiration Date:</label>
             <input class="form-control" type="text" name="expiration_date" placeholder="MM/YY" required>
+
             <label for="cvv">CVV:</label>
             <input class="form-control" type="text" name="cvv" placeholder="CVV" required>
+
             <label for="cardholder_name">Cardholder Name:</label>
             <input class="form-control" type="text" name="cardholder_name" required>
         </div>
     </div>
 
-    <button class="btn btn-primary" type="submit" >Book</button>
+    <button class="btn btn-primary" type="submit">Book</button>
 </form>
-{%endblock%}
+{% endif %}
+
+<script>
+    const seats = document.querySelectorAll('.seat');
+    const seatInput = document.getElementById('seat_number');
+
+    seats.forEach(seat => {
+        seat.addEventListener('click', () => {
+            if (seat.classList.contains('reserved')) return;
+
+            seats.forEach(s => s.classList.remove('selected'));
+            seat.classList.add('selected');
+            seatInput.value = seat.dataset.seat;
+        });
+    });
+</script>
+{% endblock %}

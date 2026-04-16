@@ -4,7 +4,6 @@ import os
 from flask import Flask, app, render_template, redirect, session, Blueprint, request, url_for, flash
 from extentions import mail
 from flask_mail import Message
-from app import mail
 from db import db_connection
 views_bp = Blueprint('views', __name__)
 
@@ -154,6 +153,7 @@ def add_booking():
 
         try:
             mail.send(msg)
+            flash("email sent successfully.", "success")
         except Exception as e:
             print("Email failed:", e)
 

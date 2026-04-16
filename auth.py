@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, Blueprint
+from flask import render_template, request, redirect, url_for, session, flash, Blueprint
 from werkzeug.security import generate_password_hash, check_password_hash
 from db import db_connection
 
@@ -25,7 +25,7 @@ def login():
             else:
                 return redirect(url_for("views.dashboard"))
         else:
-            flash("Invalid credentials", "danger")
+            flash("Invalid credentials", "error")
             return redirect(url_for("auth.login"))
 
     return render_template('login.html')
@@ -47,8 +47,6 @@ def register():
         cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
         user = cursor.fetchone()
         con.close()
-
-        print(user)
 
         if user:
             flash("Email already exists", category="error")

@@ -1,18 +1,17 @@
 {% extends 'base.html' %}
 
-{% block head %}<title>Add Route</title>{%endblock%}
+{% block head %}<title>Add Schedule</title>{% endblock %}
 
 {% block body %}
 <h2>Add a new schedule</h2>
 
 <form method="POST">
-    <input class="form-control mb-2" type="text" name="bus_number" placeholder="Bus Number" required>
-    <input class="form-control mb-2" type="text" name="route_id" placeholder="Route ID" required>
-    <input class="form-control mb-2" type="text" name="departure_time" placeholder="Departure Time (24 hours | HH:MM)" required>
-    <input class="form-control mb-2" type="text" name="arriving_time" placeholder="Arriving Time (24 hours | HH:MM)" required>
-    <input class="form-control mb-2" type="number" name="price" placeholder="Price" required>
+    <input class="form-control mb-2" type="number" name="bus_id" placeholder="Bus ID" required>
+    <input class="form-control mb-2" type="number" name="route_id" placeholder="Route ID" required>
+    <input class="form-control mb-2" type="datetime-local" name="departure_time" required>
+    <input class="form-control mb-2" type="datetime-local" name="arriving_time" required>
+    <input class="form-control mb-2" type="number" step="0.01" name="price" placeholder="Price" required>
 
-    
     <button class="btn btn-primary">Add schedule</button>
 </form>
-{%endblock%}
+{% endblock %}

@@ -32,9 +32,9 @@ def add_route():
         start = request.form['start']
         destination = request.form['destination']
         distance = request.form['distance']
-        hours = request.form.get('duration_hours')
-        minutes = request.form.get('duration_minutes')
-        travel_time = hours*60 + minutes
+        hours = int(request.form.get('duration_hours'))
+        minutes = int(request.form.get('duration_minutes'))
+        travel_time = hours * 60 + minutes
 
         db = db_connection()
         cursor = db.cursor()
@@ -79,7 +79,7 @@ def add_schedule():
         return redirect('/login')
 
     if request.method == 'POST':
-        bus_number = request.form['bus_number']
+        bus_id = request.form['bus_id']
         route_id = request.form['route_id']
         departure_time = request.form['departure_time']
         arriving_time = request.form['arriving_time']
@@ -87,8 +87,10 @@ def add_schedule():
 
         db = db_connection()
         cursor = db.cursor()
-        cursor.execute("INSERT INTO schedules (bus_id, route_id, departure_time, arriving_time, price) VALUES (%s, %s, %s, %s, %s)",
-                       (bus_number, route_id, departure_time, arriving_time, price))
+        cursor.execute(
+            "INSERT INTO schedules (bus_id, route_id, departure_time, arriving_time, price) VALUES (%s, %s, %s, %s, %s)",
+            (bus_id, route_id, departure_time, arriving_time, price)
+        )
         db.commit()
         db.close()
 
@@ -102,7 +104,7 @@ def delete_schedule(schedule_id):
         return redirect('/login')
     db = db_connection()
     cursor = db.cursor()
-    cursor.execute("DELETE FROM schedules WHERE id = %s AND user_id = %s", (schedule_id, session['user_id']))
+    cursor.execute("DELETE FROM schedules WHERE id = %s", (schedule_id,))
     db.commit()
     return redirect(url_for('admin.schedules'))
 

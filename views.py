@@ -62,7 +62,7 @@ def add_booking():
         schedule_id = request.form['schedule_id']
         seat_number = request.form['seat_number'].strip().upper()
         db = db_connection()
-        cursor = db.cursor()
+        cursor = db.cursor(dictionary=True)
         cursor.execute("SELECT s.id FROM schedules s WHERE s.id = %s AND s.departure_time > NOW()", (schedule_id,))
         schedule = cursor.fetchone()
         if not schedule:

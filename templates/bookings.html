@@ -13,7 +13,8 @@
     <div class="card-body ">
         <h5>{{ booking['start'] }} -----> {{ booking['destination'] }}</h5>
         <p>departing at:{{ booking['departure_time'] }}  |  arriving at:{{ booking['arriving_time'] }}  |  price:{{ booking['price'] }}</p>
-        <a class="btn-danger btn-sm" href="/delete_booking/{{booking['id']}}">Delete</a>
+        <a class="btn-danger btn-sm" href="{{ url_for('views.delete_booking', booking_id=booking['id']) }}">Delete</a>
+        <a class="btn-primary btn-sm" href="{{ url_for('views.ticket', booking_id=booking['id']) }}">View Ticket</a>
     </div>
 </div>
 {% endfor %}

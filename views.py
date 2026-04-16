@@ -1,4 +1,10 @@
+
+import qrcode
+import os
 from flask import Flask, app, render_template, redirect, session, Blueprint, request, url_for, flash
+from extentions import mail
+from flask_mail import Message
+from app import mail
 from db import db_connection
 views_bp = Blueprint('views', __name__)
 
@@ -40,14 +46,17 @@ def bookings():
     
     db = db_connection()
     cursor = db.cursor(dictionary=True)
-    cursor.execute("""select b.bus_number as bus_number, s.id as schedule_id,
-                    r.id as route_id, r.start as start, r.destination as destination,
-                    s.id as schedule_id, s.departure_time as departure_time,
-                    s.arriving_time as arriving_time,
-                    s.price as price from routes r 
-                    join schedules s on s.route_id = r.id
-                    join buses b on s.bus_id = b.id
-                    where s.departure_time > NOW();""")
+    cursor.execute("""SELECT bk.id AS id,
+                b.bus_number AS bus_number,
+                r.start AS start, r.destination AS destination,
+                s.departure_time AS departure_time,
+                s.arriving_time AS arriving_time, s.price AS price
+            FROM bookings bk JOIN schedules s ON bk.schedule_id = s.id
+            JOIN routes r ON s.route_id = r.id
+            JOIN buses b ON s.bus_id = b.id
+            WHERE bk.user_id = %s
+            ORDER BY s.departure_time;
+            """, (session['user_id'],))
     bookings = cursor.fetchall()
     db.close()
 
@@ -63,18 +72,19 @@ def add_booking():
         seat_number = request.form['seat_number'].strip().upper()
         db = db_connection()
         cursor = db.cursor(dictionary=True)
-        cursor.execute("SELECT s.id FROM schedules s WHERE s.id = %s AND s.departure_time > NOW()", (schedule_id,))
+
+        cursor.execute("SELECT s.id, b.seats_number FROM schedules s JOIN buses b ON s.bus_id = b.id WHERE s.id = %s AND s.departure_time > NOW()", (schedule_id,))
         schedule = cursor.fetchone()
         if not schedule:
             db.close()
             flash("Invalid schedule or schedule has already departed.", "danger")
-            return redirect(url_for('views.add_booking'))
+            return redirect(url_for('views.add_booking', schedule_id=schedule_id))
         
         valid_seats = generate_seat_labels(schedule['seats_number'])
         if seat_number not in valid_seats:
             db.close()
             flash("invalid seat selected!", "danger")
-            return redirect(url_for('views.add_booking'), schedule_id=schedule_id)
+            return redirect(url_for('views.add_booking', schedule_id=schedule_id))
 
         cursor.execute("SELECT id FROM bookings WHERE schedule_id = %s AND seat_number = %s", (schedule_id, seat_number))
         existing_booking = cursor.fetchone()
@@ -82,14 +92,75 @@ def add_booking():
         if existing_booking:
             db.close()
             flash("Seat already booked. Please choose another seat.", "danger")
-            return redirect(url_for('views.add_booking'))
+            return redirect(url_for('views.add_booking', schedule_id=schedule_id))
         
         cursor.execute("INSERT INTO bookings (user_id, schedule_id, seat_number, status, booking_time) VALUES (%s, %s, %s,%s, NOW())", (session['user_id'], schedule_id, seat_number, 'booked'))
         db.commit()
+        booking_id = cursor.lastrowid
+
+        qr_data = f"Booking ID: {booking_id}\nUser: {session['name']}\nSchedule ID: {schedule_id}\nSeat: {seat_number}"
+        qr_path = f"static/qr_codes/booking_{booking_id}.png"
+        qr = qrcode.QRCode()
+        qr.add_data(qr_data)
+        qr.make(fit=True)
+        img = qr.make_image()
+        if not os.path.exists('static/qr_codes'):
+            os.mkdir('static/qr_codes')
+        img.save(qr_path)
+
+        cursor.execute("""
+            SELECT u.name, u.email,
+                r.start, r.destination,
+                s.departure_time, s.arriving_time,
+                b.bus_number, bk.seat_number, s.price
+            FROM bookings bk
+            JOIN users u ON bk.user_id = u.id
+            JOIN schedules s ON bk.schedule_id = s.id
+            JOIN routes r ON s.route_id = r.id
+            JOIN buses b ON s.bus_id = b.id
+            WHERE bk.id = %s
+        """, (booking_id,))
+        data = cursor.fetchone()
+
+        msg = Message(
+            subject="Booking Confirmation",
+            recipients=[data['email']]
+        )
+
+        msg.body = f"""
+        Hello {data['name']},
+
+        Your booking has been confirmed.
+
+        Route: {data['start']} → {data['destination']}
+        Departure: {data['departure_time']}
+        Arrival: {data['arriving_time']}
+        Bus: {data['bus_number']}
+        Seat: {data['seat_number']}
+        Price: RM{data['price']}
+
+        Your QR ticket is attached.
+
+        Thank you.
+        """
+
+        # attach QR file
+        with open(qr_path, 'rb') as f:
+            msg.attach(
+                filename=f"booking_{booking_id}.png",
+                content_type="image/png",
+                data=f.read()
+            )
+
+        try:
+            mail.send(msg)
+        except Exception as e:
+            print("Email failed:", e)
+
         db.close()
 
         flash("Booking created successfully.", "success")
-        return redirect(url_for('views.bookings'))
+        return redirect(url_for('views.ticket', booking_id=booking_id))
     
     db = db_connection()
     cursor = db.cursor(dictionary=True)
@@ -159,6 +230,34 @@ def delete_booking(booking_id):
     cursor.execute("DELETE FROM bookings WHERE id = %s AND user_id = %s", (booking_id, session['user_id']))
     db.commit()
     return redirect(url_for('views.bookings'))
+
+@views_bp.route('/ticket/<int:booking_id>')
+def ticket(booking_id):
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    db = db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT r.start, r.destination,
+               s.departure_time,
+               b.bus_number,
+               bk.seat_number
+        FROM bookings bk
+        JOIN schedules s ON bk.schedule_id = s.id
+        JOIN routes r ON s.route_id = r.id
+        JOIN buses b ON s.bus_id = b.id
+        WHERE bk.id = %s AND bk.user_id = %s
+    """, (booking_id, session['user_id']))
+
+    booking = cursor.fetchone()
+    db.close()
+
+    if not booking:
+        return "Booking not found"
+
+    return render_template('ticket.html', booking=booking, booking_id=booking_id)
 
 def generate_seat_labels(total_seats, seats_per_row=4):
     seats = []

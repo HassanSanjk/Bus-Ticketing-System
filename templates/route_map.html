@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <title>Route Map</title>
+{% endblock %}
+
+{% block body %}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">Route Map</h4>
+                <a href="{{ url_for('views.bookings') }}" class="btn btn-outline-secondary btn-sm">
+                    Back
+                </a>
+            </div>
+
+            <h5 class="mb-1">
+                {{ booking['start'] }} → {{ booking['destination'] }}
+            </h5>
+            <p class="text-muted">
+                Visual representation of your booked trip route.
+            </p>
+
+            <div id="map" style="height: 450px; width: 100%; border-radius: 8px;"></div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+function initMap() {
+    const map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 10,
+        center: { lat: 3.1390, lng: 101.6869 } // Kuala Lumpur fallback center
+    });
+
+    const directionsService = new google.maps.DirectionsService();
+    const directionsRenderer = new google.maps.DirectionsRenderer({
+        map: map
+    });
+
+    directionsService.route(
+        {
+            origin: "{{ start_address }}",
+            destination: "{{ destination_address }}",
+            travelMode: google.maps.TravelMode.DRIVING
+        },
+        function(result, status) {
+            console.log("Directions status:", status);
+
+            if (status === "OK") {
+                directionsRenderer.setDirections(result);
+            } else {
+                alert("Route could not be loaded. Status: " + status);
+            }
+        }
+    );
+}
+</script>
+
+<script async
+    src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap">
+</script>
+
+{% endblock %}

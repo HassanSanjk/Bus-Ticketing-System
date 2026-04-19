@@ -44,3 +44,14 @@ body{
     cursor: not-allowed;
     border-color: #999;
 }
+.bus {
+    display: grid;
+    grid-template-columns: repeat(2, 60px) 40px repeat(2, 60px);
+    gap: 10px;
+    justify-content: center;
+    margin: 20px auto;
+}
+
+.aisle {
+    width: 40px;
+}

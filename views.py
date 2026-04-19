@@ -259,6 +259,53 @@ def ticket(booking_id):
 
     return render_template('ticket.html', booking=booking, booking_id=booking_id)
 
+@views_bp.route('/route_map/<int:booking_id>')
+def route_map(booking_id):
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    db = db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT bk.id,
+               r.start,
+               r.destination
+        FROM bookings bk
+        JOIN schedules s ON bk.schedule_id = s.id
+        JOIN routes r ON s.route_id = r.id
+        WHERE bk.id = %s AND bk.user_id = %s
+    """, (booking_id, session['user_id']))
+
+    booking = cursor.fetchone()
+    db.close()
+
+    if not booking:
+        return "Booking not found"
+
+    location_addresses = {
+        "APU": "Asia Pacific University of Technology & Innovation, Kuala Lumpur, Malaysia",
+        "KL Sentral": "KL Sentral, Kuala Lumpur, Malaysia",
+        "KLCC": "Petronas Twin Towers, Kuala Lumpur, Malaysia",
+        "Sunway Pyramid": "Sunway Pyramid, Selangor, Malaysia",
+        "Kuala Lumpur": "Kuala Lumpur, Malaysia",
+        "Ipoh": "Ipoh, Perak, Malaysia"
+    }
+
+    start_address = location_addresses.get(booking['start'])
+    destination_address = location_addresses.get(booking['destination'])
+
+    if not start_address or not destination_address:
+        return "Map addresses not available for this route"
+
+    return render_template(
+        'route_map.html',
+        booking=booking,
+        start_address=start_address,
+        destination_address=destination_address,
+        google_maps_api_key=os.getenv("GOOGLE_MAPS_API_KEY")
+    )
+
 def generate_seat_labels(total_seats, seats_per_row=4):
     seats = []
     for i in range(total_seats):

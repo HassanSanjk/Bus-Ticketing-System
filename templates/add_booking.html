@@ -43,38 +43,73 @@
         </div>
     </div>
 
-    <label class="form-label">Choose Seat:</label>
-    <div class="bus">
-        {% for seat in seat_labels %}
-            <div
-                class="seat {% if seat in reserved_seats %}reserved{% endif %}"
-                data-seat="{{ seat }}"
-            >
-                {{ seat }}
+    <div class="row">
+
+        <!-- LEFT: Payment -->
+        <div class="col-md-5">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Payment</h5>
+                        <img src="{{ url_for('static', filename='images/visa-logo-png-2026.png') }}"
+                            alt="Visa/Mastercard"
+                            style="height: 25px;">
+                    </div>
+
+                    <label>Card Number:</label>
+                    <input class="form-control mb-2" type="text" name="card_number" required>
+
+                    <div class="row">
+                        <div class="col">
+                            <label>Expiry</label>
+                            <input class="form-control" type="text" name="expiration_date" id="expiration_date" placeholder="MM/YY" required>
+                        </div>
+                        <div class="col">
+                            <label>CVV</label>
+                            <input class="form-control" type="text" name="cvv" id="cvv" maxlength="3" pattern="\d{3}" required>
+                        </div>
+                    </div>
+
+                    <label class="mt-2">Cardholder Name:</label>
+                    <input class="form-control" type="text" name="cardholder_name" required>
+
+                    <button class="btn btn-primary mt-3 w-100" type="submit">Book</button>
+                </div>
             </div>
-        {% endfor %}
-    </div>
-
-    <label for="seat_number" class="form-label mt-3">Selected Seat:</label>
-    <input class="form-control mb-3" type="text" name="seat_number" id="seat_number"
-           placeholder="Click a seat above" readonly required>
-
-    <div class="card mb-2">
-        <div class="card-body">
-            <h5>Payment</h5>
-
-            <label for="card_number">Card Number:</label>
-            <input class="form-control" type="text" name="card_number" placeholder="Card Number" required>
-
-            <label for="expiration_date">Expiration Date:</label>
-            <input class="form-control" type="text" name="expiration_date" placeholder="MM/YY" required>
-
-            <label for="cvv">CVV:</label>
-            <input class="form-control" type="text" name="cvv" placeholder="CVV" required>
-
-            <label for="cardholder_name">Cardholder Name:</label>
-            <input class="form-control" type="text" name="cardholder_name" required>
         </div>
+
+        <!-- RIGHT: Seat Layout -->
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-body">
+
+                    <h5 class="mb-3">Choose Seat</h5>
+
+                    <div class="bus">
+                        {% for seat in seat_labels %}
+                            
+                            {% if loop.index0 % 4 == 2 %}
+                                <div class="aisle"></div>
+                            {% endif %}
+
+                            <div
+                                class="seat {% if seat in reserved_seats %}reserved{% endif %}"
+                                data-seat="{{ seat }}"
+                            >
+                                {{ seat }}
+                            </div>
+
+                        {% endfor %}
+                    </div>
+
+                    <label class="form-label mt-3">Selected Seat:</label>
+                    <input class="form-control" type="text" name="seat_number" id="seat_number"
+                        placeholder="Click a seat above" readonly required>
+
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <button class="btn btn-primary" type="submit">Book</button>
@@ -84,6 +119,7 @@
 <script>
     const seats = document.querySelectorAll('.seat');
     const seatInput = document.getElementById('seat_number');
+    const expiryInput = document.getElementById("expiration_date");
 
     seats.forEach(seat => {
         seat.addEventListener('click', () => {
@@ -93,6 +129,16 @@
             seat.classList.add('selected');
             seatInput.value = seat.dataset.seat;
         });
+    });
+
+    expiryInput.addEventListener("input", (e) => {
+        let value = e.target.value.replace(/\D/g, ""); // only numbers
+
+        if (value.length >= 3) {
+            value = value.slice(0,2) + "/" + value.slice(2,4);
+        }
+
+        e.target.value = value;
     });
 </script>
 {% endblock %}

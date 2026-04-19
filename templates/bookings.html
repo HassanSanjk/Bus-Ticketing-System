@@ -15,6 +15,7 @@
         <p>departing at:{{ booking['departure_time'] }}  |  arriving at:{{ booking['arriving_time'] }}  |  price:{{ booking['price'] }}</p>
         <a class="btn-danger btn-sm" href="{{ url_for('views.delete_booking', booking_id=booking['id']) }}">Delete</a>
         <a class="btn-primary btn-sm" href="{{ url_for('views.ticket', booking_id=booking['id']) }}">View Ticket</a>
+        <a class="btn btn-secondary btn-sm" href="{{ url_for('views.route_map', booking_id=booking['id']) }}">Show Route</a>
     </div>
 </div>
 {% endfor %}

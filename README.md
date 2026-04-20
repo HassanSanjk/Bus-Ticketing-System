@@ -58,13 +58,14 @@ project/
 
 ### 1. Clone the repository
 
-```bash
+
 git clone https://github.com/your-username/bus-ticketing-system.git
 cd bus-ticketing-system
+
 2. Install dependencies
 pip install -r requirements.txt
-3. Configure environment variables
 
+3. Configure environment variables
 Create a .env file:
 
 SECRET_KEY=your_secret_key

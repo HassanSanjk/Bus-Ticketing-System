@@ -62,10 +62,10 @@ project/
 git clone https://github.com/your-username/bus-ticketing-system.git
 cd bus-ticketing-system
 
-2. Install dependencies
+### 2. Install dependencies
 pip install -r requirements.txt
 
-3. Configure environment variables
+### 3. Configure environment variables
 Create a .env file:
 
 SECRET_KEY=your_secret_key
@@ -77,9 +77,10 @@ MAIL_USERNAME=your_email
 MAIL_PASSWORD=your_email_password
 GOOGLE_MAPS_API_KEY=your_api_key
 
-4. Run the application
+### 4. Run the application
 python app.py
-Notes
+
+### Notes
 Make sure MySQL is running and the database schema is created
 Email functionality requires valid SMTP credentials
 Google Maps API must have Maps JavaScript and Directions APIs enabled

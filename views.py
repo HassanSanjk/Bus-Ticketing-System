@@ -29,7 +29,7 @@ def dashboard():
                     join schedules s on bk.schedule_id = s.id
                     join routes r on s.route_id = r.id
                     join buses b on s.bus_id = b.id
-                    where bk.user_id = %s and s.departure_time > NOW()
+                    where bk.user_id = %s
                     order by s.departure_time;""" , (session["user_id"],))
     upcoming_bookings = cursor.fetchall()
     db.close()
@@ -72,7 +72,7 @@ def add_booking():
         db = db_connection()
         cursor = db.cursor(dictionary=True)
 
-        cursor.execute("SELECT s.id, b.seats_number FROM schedules s JOIN buses b ON s.bus_id = b.id WHERE s.id = %s AND s.departure_time > NOW()", (schedule_id,))
+        cursor.execute("SELECT s.id, b.seats_number FROM schedules s JOIN buses b ON s.bus_id = b.id WHERE s.id = %s", (schedule_id,))
         schedule = cursor.fetchone()
         if not schedule:
             db.close()
@@ -164,16 +164,21 @@ def add_booking():
     
     db = db_connection()
     cursor = db.cursor(dictionary=True)
-    cursor.execute("""select b.bus_number as bus_number, s.id as schedule_id,
-                    r.id as route_id, r.start as start, r.destination as destination,
-                    s.id as schedule_id, s.departure_time as departure_time,
-                    s.arriving_time as arriving_time,
-                    s.price as price from routes r 
-                    join schedules s on s.route_id = r.id
-                    join buses b on s.bus_id = b.id
-                    where s.departure_time > NOW()
-                    ORDER BY s.departure_time ASC;
-                    """)
+    cursor.execute("""
+            SELECT 
+                b.bus_number AS bus_number,
+                s.id AS schedule_id,
+                r.id AS route_id,
+                r.start AS start,
+                r.destination AS destination,
+                s.departure_time AS departure_time,
+                s.arriving_time AS arriving_time,
+                s.price AS price
+            FROM routes r
+            JOIN schedules s ON s.route_id = r.id
+            JOIN buses b ON s.bus_id = b.id
+            ORDER BY s.departure_time ASC
+        """)
     schedules = cursor.fetchall()
 
     selected_schedule_id = request.args.get('schedule_id', type=int)
@@ -195,7 +200,7 @@ def add_booking():
             FROM schedules s
             JOIN buses b ON s.bus_id = b.id
             JOIN routes r ON s.route_id = r.id
-            WHERE s.id = %s AND s.departure_time > NOW()
+            WHERE s.id = %s
         """, (selected_schedule_id,))
         selected_schedule = cursor.fetchone()
 

@@ -1,16 +1,55 @@
 {% extends 'base.html' %}
 
-{% block head %}<title>Add Route</title>{%endblock%}
+{% block head %}
+<title>Add Route</title>
+{% endblock %}
 
 {% block body %}
-<h2>Add a new route</h2>
+<div class="container mt-4">
 
-<form method="POST">
-    <input class="form-control mb-2" type="text" name="start" placeholder="Start Location" required>
-    <input class="form-control mb-2" type="text" name="destination" placeholder="Destination" required>
-    <input class="form-control mb-2" type="number" name="distance" placeholder="Distance (KM)" required>
-    <input class="form-control mb-2" type="number" name="duration_hours" placeholder="Duration (Hours)" required>
-    <input class="form-control mb-2" type="number" name="duration_minutes" placeholder="Duration (Minutes)" required>
-    <button class="btn btn-primary">Add route</button>
-</form>
-{%endblock%}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Add Route</h2>
+        <a href="{{ url_for('admin.routes') }}" class="btn btn-outline-secondary btn-sm">Back</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <form method="POST">
+
+                <div class="mb-3">
+                    <label class="form-label">Start Location</label>
+                    <input class="form-control" type="text" name="start" placeholder="Example: APU" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Destination</label>
+                    <input class="form-control" type="text" name="destination" placeholder="Example: KL Sentral" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Distance (KM)</label>
+                    <input class="form-control" type="number" name="distance" placeholder="Example: 18" min="1" step="0.1" required>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Duration Hours</label>
+                        <input class="form-control" type="number" name="duration_hours" placeholder="Example: 1" min="0" required>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Duration Minutes</label>
+                        <input class="form-control" type="number" name="duration_minutes" placeholder="Example: 30" min="0" max="59" required>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" type="submit">Add Route</button>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

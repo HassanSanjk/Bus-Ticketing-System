@@ -1,19 +1,48 @@
 {% extends 'base.html' %}
 
-{% block head %}<title>Routes</title>{%endblock%}
+{% block head %}
+<title>Drivers</title>
+{% endblock %}
 
-{% block body %} 
-<h2>Drivers</h2>
-<a class= "btn btn-success mb-3" href="{{ url_for('admin.add_driver') }}">Add Driver</a>
-{% if drivers == [] %}<p>No drivers yet</p>{% endif %}
-{% for driver in drivers %}
-<div class="card mb-2">
-    <div class="card-body ">
-        <h5>{{ driver['name'] }}</h5>
-        <p>{{ driver['license_number'] }}  |  {{ driver['phone'] }}  |  {{ driver['experience'] }}  |  {{ driver['status'] }}</p>
-        <a class="btn-danger btn-sm" href="/delete_driver/{{driver['id']}}">Delete</a>
+{% block body %}
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Drivers</h2>
+        <a class="btn btn-success" href="{{ url_for('admin.add_driver') }}">Add Driver</a>
     </div>
-</div>
-{% endfor %}
 
-{%endblock%}
+    {% if drivers == [] %}
+        <div class="alert alert-info">No drivers added yet.</div>
+    {% endif %}
+
+    {% for driver in drivers %}
+    <div class="card mb-2 shadow-sm">
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h5 class="mb-1">{{ driver['name'] }}</h5>
+                    <p class="mb-1">
+                        <strong>License:</strong> {{ driver['license_number'] }} |
+                        <strong>Phone:</strong> {{ driver['phone'] }}
+                    </p>
+                    <p class="mb-0">
+                        <strong>Experience:</strong> {{ driver['experience'] }} years |
+                        <strong>Status:</strong> {{ driver['status'] }}
+                    </p>
+                </div>
+
+                <a class="btn btn-danger btn-sm"
+                   href="{{ url_for('admin.delete_driver', driver_id=driver['id']) }}"
+                   onclick="return confirm('Are you sure you want to delete this driver?');">
+                    Delete
+                </a>
+            </div>
+
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

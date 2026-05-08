@@ -1,19 +1,55 @@
 {% extends 'base.html' %}
 
-{% block head %}<title>Routes</title>{%endblock%}
+{% block head %}
+<title>Schedules</title>
+{% endblock %}
 
-{% block body %} 
-<h2>Schedules</h2>
-<a class= "btn btn-success mb-3" href="{{ url_for('admin.add_schedule') }}">Add Schedule</a>
-{% if schedules == [] %}<p>No schedules yet</p>{% endif %}
-{% for schedule in schedules %}
-<div class="card mb-2">
-    <div class="card-body ">
-        <h5>{{ schedule['bus_number'] }}</h5>
-        <p>{{ schedule['departure_time'] }}  |  {{ schedule['arriving_time'] }}  |  {{ schedule['price'] }}$</p>
-        <a class="btn-danger btn-sm" href="/delete_schedule/{{schedule['id']}}">Delete</a>
+{% block body %}
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Schedules</h2>
+        <a class="btn btn-success" href="{{ url_for('admin.add_schedule') }}">Add Schedule</a>
     </div>
-</div>
-{% endfor %}
 
-{%endblock%}
+    {% if schedules == [] %}
+        <div class="alert alert-info">No schedules added yet.</div>
+    {% endif %}
+
+    {% for schedule in schedules %}
+    <div class="card mb-2 shadow-sm">
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h5 class="mb-1">
+                        {{ schedule['start'] }} → {{ schedule['destination'] }}
+                    </h5>
+
+                    <p class="mb-1">
+                        <strong>Bus:</strong> {{ schedule['bus_number'] }}
+                    </p>
+
+                    <p class="mb-1">
+                        <strong>Departure:</strong> {{ schedule['departure_time'] }} |
+                        <strong>Arrival:</strong> {{ schedule['arriving_time'] }}
+                    </p>
+
+                    <p class="mb-0">
+                        <strong>Price:</strong> RM{{ schedule['price'] }}
+                    </p>
+                </div>
+
+                <a class="btn btn-danger btn-sm"
+                   href="{{ url_for('admin.delete_schedule', schedule_id=schedule['id']) }}"
+                   onclick="return confirm('Are you sure you want to delete this schedule?');">
+                    Delete
+                </a>
+            </div>
+
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

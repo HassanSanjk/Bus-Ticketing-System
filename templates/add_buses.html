@@ -1,16 +1,55 @@
 {% extends 'base.html' %}
 
-{% block head %}<title>Add Bus</title>{%endblock%}
+{% block head %}
+<title>Add Bus</title>
+{% endblock %}
 
 {% block body %}
-<h2>Add a new Bus</h2>
+<div class="container mt-4">
 
-<form method="POST">
-    <input class="form-control mb-2" type="text" name="bus_number" placeholder="Bus Number" required>
-    <input class="form-control mb-2" type="text" name="seats_number" placeholder="Seats Number" required>
-    <input class="form-control mb-2" type="text" name="colour" placeholder="Colour" required>
-    <input class="form-control mb-2" type="text" name="driver_id" placeholder="Driver ID" required>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Add Bus</h2>
+        <a href="{{ url_for('admin.buses') }}" class="btn btn-outline-secondary btn-sm">Back</a>
+    </div>
 
-    <button class="btn btn-primary">Add Bus</button>
-</form>
-{%endblock%}
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <form method="POST">
+
+                <div class="mb-3">
+                    <label class="form-label">Bus Number</label>
+                    <input class="form-control" type="text" name="bus_number" placeholder="Example: BUS-101" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Number of Seats</label>
+                    <input class="form-control" type="number" name="seats_number" placeholder="Example: 40" min="1" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Colour</label>
+                    <input class="form-control" type="text" name="colour" placeholder="Example: Blue" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Assigned Driver</label>
+                    <select class="form-control" name="driver_id" required>
+                        <option value="">-- Select driver --</option>
+                        {% for driver in drivers %}
+                            <option value="{{ driver.id }}">
+                                {{ driver.name }} - {{ driver.status }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button class="btn btn-primary" type="submit">Add Bus</button>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

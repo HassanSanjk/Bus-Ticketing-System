@@ -1,17 +1,67 @@
 {% extends 'base.html' %}
 
-{% block head %}<title>Add Schedule</title>{% endblock %}
+{% block head %}
+<title>Add Schedule</title>
+{% endblock %}
 
 {% block body %}
-<h2>Add a new schedule</h2>
+<div class="container mt-4">
 
-<form method="POST">
-    <input class="form-control mb-2" type="number" name="bus_id" placeholder="Bus ID" required>
-    <input class="form-control mb-2" type="number" name="route_id" placeholder="Route ID" required>
-    <input class="form-control mb-2" type="datetime-local" name="departure_time" required>
-    <input class="form-control mb-2" type="datetime-local" name="arriving_time" required>
-    <input class="form-control mb-2" type="number" step="0.01" name="price" placeholder="Price" required>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Add Schedule</h2>
+        <a href="{{ url_for('admin.schedules') }}" class="btn btn-outline-secondary btn-sm">Back</a>
+    </div>
 
-    <button class="btn btn-primary">Add schedule</button>
-</form>
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <form method="POST">
+
+                <div class="mb-3">
+                    <label class="form-label">Bus</label>
+                    <select class="form-control" name="bus_id" required>
+                        <option value="">-- Select bus --</option>
+                        {% for bus in buses %}
+                            <option value="{{ bus.id }}">
+                                {{ bus.bus_number }} | {{ bus.seats_number }} seats
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Route</label>
+                    <select class="form-control" name="route_id" required>
+                        <option value="">-- Select route --</option>
+                        {% for route in routes %}
+                            <option value="{{ route.id }}">
+                                {{ route.start }} → {{ route.destination }} | {{ route.distance_km }} KM
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Departure Time</label>
+                    <input class="form-control" type="datetime-local" name="departure_time" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Arrival Time</label>
+                    <input class="form-control" type="datetime-local" name="arriving_time" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Price (RM)</label>
+                    <input class="form-control" type="number" step="0.01" min="0" name="price" placeholder="Example: 25.00" required>
+                </div>
+
+                <button class="btn btn-primary" type="submit">Add Schedule</button>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
 {% endblock %}

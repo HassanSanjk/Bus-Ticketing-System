@@ -1,19 +1,48 @@
 {% extends 'base.html' %}
 
-{% block head %}<title>Routes</title>{%endblock%}
+{% block head %}
+<title>Routes</title>
+{% endblock %}
 
-{% block body %} 
-<h2>Routes</h2>
-<a class= "btn btn-success mb-3" href="{{ url_for('admin.add_route') }}">Add Route</a>
-{% if routes == [] %}<p>No routes yet</p>{% endif %}
-{% for route in routes %}
-<div class="card mb-2">
-    <div class="card-body ">
-        <h5>{{ route['start'] }} -----> {{ route['destination'] }}</h5>
-        <p>{{ route['distance_km'] }} KM  |  {{ route['travel_time']//60 }}:{{ '%02d' % (route['travel_time']%60) }} hour trip</p>
-        <a class="btn-danger btn-sm" href="/delete_route/{{route['id']}}">Delete</a>
+{% block body %}
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Routes</h2>
+        <a class="btn btn-success" href="{{ url_for('admin.add_route') }}">Add Route</a>
     </div>
-</div>
-{% endfor %}
 
-{%endblock%}
+    {% if routes == [] %}
+        <div class="alert alert-info">No routes added yet.</div>
+    {% endif %}
+
+    {% for route in routes %}
+    <div class="card mb-2 shadow-sm">
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h5 class="mb-1">
+                        {{ route['start'] }} → {{ route['destination'] }}
+                    </h5>
+
+                    <p class="mb-0">
+                        <strong>Distance:</strong> {{ route['distance_km'] }} KM |
+                        <strong>Travel Time:</strong>
+                        {{ route['travel_time'] // 60 }}h {{ '%02d' % (route['travel_time'] % 60) }}m
+                    </p>
+                </div>
+
+                <a class="btn btn-danger btn-sm"
+                   href="{{ url_for('admin.delete_route', route_id=route['id']) }}"
+                   onclick="return confirm('Are you sure you want to delete this route?');">
+                    Delete
+                </a>
+            </div>
+
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

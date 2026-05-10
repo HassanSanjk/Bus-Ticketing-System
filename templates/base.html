@@ -34,8 +34,10 @@
   </nav>
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
+    <div style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
       {% for category, message in messages %}
         {% if category == 'error' %}
+        <div style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
           <div class="alert alert-danger alert-dismissible fade show mb-2" role="alert">
             {{message}}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -47,6 +49,7 @@
           </div>
         {% endif %}
       {% endfor %}
+      </div>
     {% endif %}
     {% endwith %}
 
